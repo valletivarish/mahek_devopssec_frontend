@@ -1,0 +1,63 @@
+/* Tailwind CSS base directives for utility-first styling */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom base styles applied globally across the application */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Custom component styles for reusable UI patterns */
+@layer components {
+  /* Primary action button with hover and focus states */
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+           transition-colors duration-200 font-medium;
+  }
+
+  /* Secondary button for less prominent actions */
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300
+           focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+           transition-colors duration-200 font-medium;
+  }
+
+  /* Danger button for destructive actions like delete */
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700
+           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+           transition-colors duration-200 font-medium;
+  }
+
+  /* Consistent form input styling with focus ring */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           transition-colors duration-200;
+  }
+
+  /* Form label styling */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  /* Validation error message styling */
+  .form-error {
+    @apply text-red-600 text-sm mt-1;
+  }
+
+  /* Card container for dashboard and list items */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+
+  /* Page title heading */
+  .page-title {
+    @apply text-2xl font-bold text-gray-900 mb-6;
+  }
+}

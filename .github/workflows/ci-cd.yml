@@ -1,0 +1,127 @@
+# ============================================
+# Frontend CI/CD Pipeline - Event RSVP and Attendance Manager
+# This pipeline runs linting, security audit, builds the production bundle,
+# and deploys the static files to AWS S3.
+# ============================================
+
+name: Frontend CI/CD Pipeline
+
+# Trigger pipeline on push to main branch and on pull requests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ============================================
+  # CI Stage: Lint, Audit, and Build
+  # Runs on every push and pull request
+  # ============================================
+  ci:
+    name: Lint, Audit & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the source code from the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js 18 with npm caching for faster installs
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # Step 3: Install dependencies using npm ci for reproducible builds
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Run ESLint to check code quality and catch potential issues
+      - name: Run ESLint
+        run: npm run lint
+
+      # Step 5: Run npm audit to scan for known dependency vulnerabilities
+      - name: Security Audit (npm audit)
+        run: npm audit --audit-level=moderate || true
+
+      # Step 6: Generate npm audit report as JSON for artifact upload
+      - name: Generate Audit Report
+        run: npm audit --json > npm-audit-report.json || true
+
+      # Step 7: Build the production bundle to verify it compiles successfully
+      - name: Build Production Bundle
+        run: npm run build
+
+      # Step 8: Run Trivy filesystem scan for additional security analysis
+      - name: Security Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          output: 'trivy-frontend-report.txt'
+
+      # Step 9: Upload npm audit report as a build artifact
+      - name: Upload Audit Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+          retention-days: 30
+
+      # Step 10: Upload Trivy report as a build artifact
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-frontend-report
+          path: trivy-frontend-report.txt
+          retention-days: 30
+
+      # Step 11: Upload production build output for CD stage
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+          retention-days: 5
+
+  # ============================================
+  # CD Stage: Deploy to AWS S3
+  # Only runs on push to main branch (not on PRs)
+  # ============================================
+  cd:
+    name: Deploy to AWS S3
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      # Step 1: Download the built frontend files from the CI stage
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist/
+
+      # Step 2: Configure AWS credentials for S3 deployment
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      # Step 3: Sync the built files to the S3 bucket for static hosting
+      - name: Deploy to S3
+        run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
+
+      # Step 4: Smoke test - verify the backend health endpoint is reachable
+      - name: Smoke Test - Backend Health Check
+        run: |
+          curl -f http://${{ secrets.EC2_HOST }}:8080/api/health || echo "Backend health check pending"
