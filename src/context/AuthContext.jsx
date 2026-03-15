@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-// Custom hook for consuming auth context in components
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
