@@ -14,12 +14,12 @@ import RsvpList from './components/Rsvps/RsvpList';
 import RsvpForm from './components/Rsvps/RsvpForm';
 import CheckInList from './components/CheckIns/CheckInList';
 import CheckInForm from './components/CheckIns/CheckInForm';
-import ForecastPage from './components/Forecast/ForecastPage';
+import ReportsPage from './components/Reports/ReportsPage';
 
 /**
  * Main application component defining all routes.
  * Public routes: login, register
- * Protected routes: dashboard, events, attendees, categories, RSVPs, check-ins, forecast
+ * Protected routes: dashboard, events, attendees, categories, RSVPs, check-ins, reports
  */
 function App() {
   return (
@@ -57,8 +57,8 @@ function App() {
         <Route path="checkins" element={<CheckInList />} />
         <Route path="checkins/new" element={<CheckInForm />} />
 
-        {/* Attendance forecasting analytics page */}
-        <Route path="forecast" element={<ForecastPage />} />
+        {/* Event reports and analytics page */}
+        <Route path="reports" element={<ReportsPage />} />
       </Route>
     </Routes>
   );

@@ -31,10 +31,19 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(loginSchema),
   });
+
+  /**
+   * Fill the login form with demo credentials for quick access.
+   */
+  const fillDemoCredentials = (username, password) => {
+    setValue('username', username, { shouldValidate: true });
+    setValue('password', password, { shouldValidate: true });
+  };
 
   /**
    * Handle form submission: call the login API, store auth data, redirect.
@@ -125,6 +134,34 @@ function LoginForm() {
             {submitting ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        {/* Demo credential buttons for quick login */}
+        <div className="mt-6">
+          <p className="text-center text-sm text-gray-400 mb-3">Quick login with demo accounts</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => fillDemoCredentials('admin', 'admin123')}
+              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-primary-300 text-primary-700 bg-primary-50 hover:bg-primary-100 transition"
+            >
+              Demo: Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoCredentials('john', 'john123')}
+              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              Demo: John
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoCredentials('sarah', 'sarah123')}
+              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              Demo: Sarah
+            </button>
+          </div>
+        </div>
 
         {/* Link to registration page for new users */}
         <p className="text-center text-gray-500 mt-6">

@@ -6,7 +6,7 @@ import {
   FiTag,
   FiCheckCircle,
   FiUserCheck,
-  FiTrendingUp,
+  FiBarChart2,
 } from 'react-icons/fi';
 
 /**
@@ -31,7 +31,7 @@ function Sidebar() {
     { path: '/categories', label: 'Categories', icon: FiTag },
     { path: '/rsvps', label: 'RSVPs', icon: FiCheckCircle },
     { path: '/checkins', label: 'Check-ins', icon: FiUserCheck },
-    { path: '/forecast', label: 'Forecast', icon: FiTrendingUp },
+    { path: '/reports', label: 'Reports', icon: FiBarChart2 },
   ];
 
   return (
