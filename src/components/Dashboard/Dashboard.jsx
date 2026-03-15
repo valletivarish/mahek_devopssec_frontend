@@ -124,17 +124,23 @@ function Dashboard() {
     },
     {
       label: 'Attendance Rate',
-      value: `${data?.attendanceRate || 0}%`,
+      value: `${parseFloat(data?.attendanceRate || 0).toFixed(1)}%`,
       icon: FiPercent,
       color: 'text-pink-600',
       bg: 'bg-pink-50',
     },
   ];
 
-  // Extract chart data arrays from the API response with empty array fallbacks
-  const rsvpsByStatus = data?.rsvpsByStatus || [];
-  const eventsByCategory = data?.eventsByCategory || [];
-  const monthlyTrend = data?.monthlyTrend || [];
+  // Convert API response objects (Map<String, Long>) to arrays for Recharts
+  const rsvpsByStatus = data?.rsvpsByStatus
+    ? Object.entries(data.rsvpsByStatus).map(([name, value]) => ({ name, value }))
+    : [];
+  const eventsByCategory = data?.eventsByCategory
+    ? Object.entries(data.eventsByCategory).map(([name, count]) => ({ name, count }))
+    : [];
+  const monthlyTrend = data?.monthlyEventCounts
+    ? Object.entries(data.monthlyEventCounts).map(([month, count]) => ({ month, count }))
+    : [];
   const recentEvents = data?.recentEvents || [];
 
   return (
