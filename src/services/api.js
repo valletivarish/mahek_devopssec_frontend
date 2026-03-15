@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base API URL - uses environment variable in production, defaults to localhost for dev
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8085/api';
 
 /**
  * Axios instance configured with base URL and JSON content type.

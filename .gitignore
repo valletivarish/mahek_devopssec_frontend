@@ -40,3 +40,10 @@ terraform/.terraform.lock.hcl
 
 # Test coverage output
 coverage/
+
+# Playwright test files (not part of the main app)
+tests/
+test-results/
+playwright-report/
+playwright.config.js
+.playwright-mcp/
