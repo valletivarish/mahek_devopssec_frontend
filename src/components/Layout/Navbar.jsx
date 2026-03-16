@@ -40,6 +40,11 @@ function Navbar() {
           <div className="flex items-center text-gray-600">
             <FiUser className="mr-2" />
             <span className="text-sm font-medium">{user?.username || 'User'}</span>
+            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-medium ${
+              user?.role === 'ADMIN' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
+            }`}>
+              {user?.role || 'USER'}
+            </span>
           </div>
 
           {/* Logout button */}

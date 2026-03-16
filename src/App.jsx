@@ -3,6 +3,7 @@ import MainLayout from './components/Layout/MainLayout';
 import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import AdminRoute from './components/Auth/AdminRoute';
 import Dashboard from './components/Dashboard/Dashboard';
 import EventList from './components/Events/EventList';
 import EventForm from './components/Events/EventForm';
@@ -17,9 +18,9 @@ import CheckInForm from './components/CheckIns/CheckInForm';
 import ReportsPage from './components/Reports/ReportsPage';
 
 /**
- * Main application component defining all routes.
- * Public routes: login, register
- * Protected routes: dashboard, events, attendees, categories, RSVPs, check-ins, reports
+ * Main application component with role-based routing.
+ * ADMIN: full access to all routes
+ * USER: Dashboard, Events (view-only), RSVPs, Check-ins
  */
 function App() {
   return (
@@ -33,32 +34,32 @@ function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
 
-        {/* Event management routes */}
+        {/* Events - viewable by all, create/edit only by ADMIN */}
         <Route path="events" element={<EventList />} />
-        <Route path="events/new" element={<EventForm />} />
-        <Route path="events/edit/:id" element={<EventForm />} />
+        <Route path="events/new" element={<AdminRoute><EventForm /></AdminRoute>} />
+        <Route path="events/edit/:id" element={<AdminRoute><EventForm /></AdminRoute>} />
 
-        {/* Attendee management routes */}
-        <Route path="attendees" element={<AttendeeList />} />
-        <Route path="attendees/new" element={<AttendeeForm />} />
-        <Route path="attendees/edit/:id" element={<AttendeeForm />} />
+        {/* Attendee management - ADMIN only */}
+        <Route path="attendees" element={<AdminRoute><AttendeeList /></AdminRoute>} />
+        <Route path="attendees/new" element={<AdminRoute><AttendeeForm /></AdminRoute>} />
+        <Route path="attendees/edit/:id" element={<AdminRoute><AttendeeForm /></AdminRoute>} />
 
-        {/* Category management routes */}
-        <Route path="categories" element={<CategoryList />} />
-        <Route path="categories/new" element={<CategoryForm />} />
-        <Route path="categories/edit/:id" element={<CategoryForm />} />
+        {/* Category management - ADMIN only */}
+        <Route path="categories" element={<AdminRoute><CategoryList /></AdminRoute>} />
+        <Route path="categories/new" element={<AdminRoute><CategoryForm /></AdminRoute>} />
+        <Route path="categories/edit/:id" element={<AdminRoute><CategoryForm /></AdminRoute>} />
 
-        {/* RSVP management routes */}
+        {/* RSVP management - accessible by all authenticated users */}
         <Route path="rsvps" element={<RsvpList />} />
         <Route path="rsvps/new" element={<RsvpForm />} />
         <Route path="rsvps/edit/:id" element={<RsvpForm />} />
 
-        {/* Check-in management routes */}
+        {/* Check-in management - accessible by all authenticated users */}
         <Route path="checkins" element={<CheckInList />} />
         <Route path="checkins/new" element={<CheckInForm />} />
 
-        {/* Event reports and analytics page */}
-        <Route path="reports" element={<ReportsPage />} />
+        {/* Reports - ADMIN only */}
+        <Route path="reports" element={<AdminRoute><ReportsPage /></AdminRoute>} />
       </Route>
     </Routes>
   );

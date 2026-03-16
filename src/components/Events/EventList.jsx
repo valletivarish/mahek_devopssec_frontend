@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
+import { useAuth } from '../../context/AuthContext';
 import eventService from '../../services/eventService';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
@@ -9,18 +10,11 @@ import ConfirmDialog from '../common/ConfirmDialog';
 
 /**
  * EventList component displays all events in a searchable, tabular format.
- * Features:
- * - Page title with "Add Event" navigation button
- * - Search input that filters events by title (debounced on keystroke)
- * - Responsive table showing: Title, Date, Time, Location, Capacity, Status, Category, Actions
- * - Status badges with colour coding: UPCOMING=blue, ONGOING=green, COMPLETED=gray, CANCELLED=red
- * - Capacity column shows confirmed RSVPs vs total capacity (e.g., "15/50")
- * - Edit button links to the event edit form
- * - Delete button opens a confirmation dialog before deleting
- * - Toast notifications for successful deletion or API errors
- * - Loading spinner and error message states
+ * ADMIN users see Add/Edit/Delete buttons; USER role sees read-only view.
  */
 function EventList() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   // State for the list of events fetched from the API
   const [events, setEvents] = useState([]);
 
@@ -123,13 +117,15 @@ function EventList() {
       {/* Page header with title and Add Event button */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Events</h2>
-        <Link
-          to="/events/new"
-          className="flex items-center bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition font-medium text-sm"
-        >
-          <FiPlus className="mr-2" />
-          Add Event
-        </Link>
+        {isAdmin && (
+          <Link
+            to="/events/new"
+            className="flex items-center bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition font-medium text-sm"
+          >
+            <FiPlus className="mr-2" />
+            Add Event
+          </Link>
+        )}
       </div>
 
       {/* Search input for filtering events by title */}
@@ -159,7 +155,7 @@ function EventList() {
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Capacity</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                {isAdmin && <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -192,25 +188,26 @@ function EventList() {
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {event.categoryName || event.category?.name || '-'}
                     </td>
-                    {/* Action buttons: Edit and Delete */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          to={`/events/edit/${event.id}`}
-                          className="text-blue-600 hover:text-blue-800 p-1.5 rounded hover:bg-blue-50 transition"
-                          title="Edit event"
-                        >
-                          <FiEdit2 />
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteClick(event.id)}
-                          className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50 transition"
-                          title="Delete event"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </td>
+                    {isAdmin && (
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/events/edit/${event.id}`}
+                            className="text-blue-600 hover:text-blue-800 p-1.5 rounded hover:bg-blue-50 transition"
+                            title="Edit event"
+                          >
+                            <FiEdit2 />
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteClick(event.id)}
+                            className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50 transition"
+                            title="Delete event"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

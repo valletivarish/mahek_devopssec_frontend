@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import {
   FiHome,
   FiCalendar,
@@ -10,48 +11,37 @@ import {
 } from 'react-icons/fi';
 
 /**
- * Left sidebar navigation component providing links to all application pages.
- * Features:
- * - Fixed position on the left side of the viewport
- * - Dark background (bg-gray-900) with white text for contrast
- * - Width of 64 (w-64 = 16rem) matching the main layout offset
- * - Each link uses NavLink with active styling to highlight the current page
- * - Icons from react-icons/fi precede each navigation label
- * - Full viewport height with scrollable content if needed
+ * Left sidebar navigation with role-based access control.
+ * ADMIN: sees all navigation items (Dashboard, Events, Attendees, Categories, RSVPs, Check-ins, Reports)
+ * USER: sees only Dashboard, Events, RSVPs, and Check-ins
  */
 function Sidebar() {
-  /**
-   * Navigation items array defining each sidebar link.
-   * Each item has a path (route), label (display text), and icon component.
-   */
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: FiHome },
-    { path: '/events', label: 'Events', icon: FiCalendar },
-    { path: '/attendees', label: 'Attendees', icon: FiUsers },
-    { path: '/categories', label: 'Categories', icon: FiTag },
-    { path: '/rsvps', label: 'RSVPs', icon: FiCheckCircle },
-    { path: '/checkins', label: 'Check-ins', icon: FiUserCheck },
-    { path: '/reports', label: 'Reports', icon: FiBarChart2 },
+    { path: '/dashboard', label: 'Dashboard', icon: FiHome, roles: ['ADMIN', 'USER'] },
+    { path: '/events', label: 'Events', icon: FiCalendar, roles: ['ADMIN', 'USER'] },
+    { path: '/attendees', label: 'Attendees', icon: FiUsers, roles: ['ADMIN'] },
+    { path: '/categories', label: 'Categories', icon: FiTag, roles: ['ADMIN'] },
+    { path: '/rsvps', label: 'RSVPs', icon: FiCheckCircle, roles: ['ADMIN', 'USER'] },
+    { path: '/checkins', label: 'Check-ins', icon: FiUserCheck, roles: ['ADMIN', 'USER'] },
+    { path: '/reports', label: 'Reports', icon: FiBarChart2, roles: ['ADMIN'] },
   ];
 
+  const visibleItems = navItems.filter(item => item.roles.includes(user?.role || 'USER'));
+
   return (
-    // Fixed sidebar occupying the full height on the left
     <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 text-white flex flex-col z-50">
-      {/* Sidebar header / app logo area */}
       <div className="px-6 py-5 border-b border-gray-700">
         <h2 className="text-lg font-bold tracking-wide">RSVP Manager</h2>
         <p className="text-gray-400 text-xs mt-1">Event Attendance System</p>
       </div>
 
-      {/* Navigation links list */}
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1 px-3">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <li key={item.path}>
-              {/*
-                NavLink automatically adds an "active" class when the route matches.
-                We use a function for className to apply different styles for active vs inactive states.
-              */}
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
@@ -62,9 +52,7 @@ function Sidebar() {
                   }`
                 }
               >
-                {/* Icon for the navigation item */}
                 <item.icon className="mr-3 text-lg" />
-                {/* Label text */}
                 {item.label}
               </NavLink>
             </li>
@@ -72,9 +60,8 @@ function Sidebar() {
         </ul>
       </nav>
 
-      {/* Footer area at the bottom of the sidebar */}
       <div className="px-6 py-4 border-t border-gray-700">
-        <p className="text-gray-500 text-xs">Event RSVP &amp; Attendance</p>
+        <p className="text-gray-500 text-xs">{isAdmin ? 'Admin Panel' : 'User Panel'}</p>
       </div>
     </aside>
   );
