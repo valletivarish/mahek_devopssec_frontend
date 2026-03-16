@@ -54,9 +54,9 @@ function App() {
         <Route path="rsvps/new" element={<RsvpForm />} />
         <Route path="rsvps/edit/:id" element={<RsvpForm />} />
 
-        {/* Check-in management - accessible by all authenticated users */}
-        <Route path="checkins" element={<CheckInList />} />
-        <Route path="checkins/new" element={<CheckInForm />} />
+        {/* Check-in management - ADMIN only */}
+        <Route path="checkins" element={<AdminRoute><CheckInList /></AdminRoute>} />
+        <Route path="checkins/new" element={<AdminRoute><CheckInForm /></AdminRoute>} />
 
         {/* Reports - ADMIN only */}
         <Route path="reports" element={<AdminRoute><ReportsPage /></AdminRoute>} />

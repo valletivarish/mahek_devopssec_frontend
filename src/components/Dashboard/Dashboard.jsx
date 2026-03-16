@@ -183,9 +183,13 @@ function Dashboard() {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  /* Display the name and percentage on each pie slice label */
-                  label={({ name, percent }) =>
-                    `${name} (${(percent * 100).toFixed(0)}%)`
+                  /* Only show label for slices > 5% to avoid overlapping text */
+                  label={({ name, percent, x, y }) =>
+                    percent > 0.05 ? (
+                      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={12} fill="#374151">
+                        {`${name} (${(percent * 100).toFixed(0)}%)`}
+                      </text>
+                    ) : null
                   }
                   outerRadius={100}
                   fill="#8884d8"
