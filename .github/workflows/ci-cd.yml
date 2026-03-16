@@ -50,9 +50,11 @@ jobs:
       - name: Generate Audit Report
         run: npm audit --json > npm-audit-report.json || true
 
-      # Step 7: Build the production bundle to verify it compiles successfully
+      # Step 7: Build the production bundle with API URL pointing to EC2 backend
       - name: Build Production Bundle
         run: npm run build
+        env:
+          VITE_API_URL: http://${{ secrets.EC2_HOST }}:8080/api
 
       # Step 8: Run Trivy filesystem scan for additional security analysis
       - name: Security Vulnerability Scan (Trivy)
