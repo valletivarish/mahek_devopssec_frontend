@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 import { rsvpSchema } from '../../utils/validators';
 import rsvpService from '../../services/rsvpService';
 import eventService from '../../services/eventService';
@@ -12,60 +13,35 @@ import ErrorMessage from '../common/ErrorMessage';
 
 /**
  * RsvpForm component for creating and editing RSVP records.
- * Features:
- * - Detects edit mode based on the presence of an :id route parameter
- * - Form validation using react-hook-form with yup rsvpSchema
- * - Fields: eventId (dropdown), attendeeId (dropdown), status (dropdown),
- *   dietaryPreferences (text), specialRequirements (text)
- * - Event and Attendee dropdowns are dynamically populated from their respective services
- * - On edit: pre-populates form with existing RSVP data from rsvpService.getById()
- * - On submit: calls rsvpService.create (new) or rsvpService.update (edit)
- * - Success toast notification and redirect back to /rsvps
- * - Inline validation errors displayed below each field
+ * Admin users can select any attendee from the dropdown.
+ * Regular users are auto-assigned to their linked attendee record.
  */
 function RsvpForm() {
-  // Navigation hook for redirecting after form submission
   const navigate = useNavigate();
-
-  // Route parameter: present when editing, absent when creating
   const { id } = useParams();
-
-  // Determine if the form is in edit mode
   const isEditMode = Boolean(id);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
-  // State for event options loaded from the API
   const [events, setEvents] = useState([]);
-
-  // State for attendee options loaded from the API
   const [attendees, setAttendees] = useState([]);
-
-  // Loading state for initial data fetch
   const [loading, setLoading] = useState(true);
-
-  // Error state for displaying fetch errors
   const [error, setError] = useState('');
-
-  // Track form submission state to prevent double-clicks
   const [submitting, setSubmitting] = useState(false);
 
-  // Initialize react-hook-form with yup RSVP validation schema
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(rsvpSchema),
   });
 
-  /**
-   * On component mount, fetch events and attendees for the dropdowns.
-   * If in edit mode, also fetch the existing RSVP data to populate the form.
-   */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch events and attendees in parallel for dropdown options
         const [eventsRes, attendeesRes] = await Promise.all([
           eventService.getAll(),
           attendeeService.getAll(),
@@ -73,7 +49,11 @@ function RsvpForm() {
         setEvents(eventsRes.data);
         setAttendees(attendeesRes.data);
 
-        // If editing, fetch the existing RSVP and populate the form
+        // For non-admin users, auto-set their linked attendee
+        if (!isAdmin && user?.attendeeId) {
+          setValue('attendeeId', user.attendeeId);
+        }
+
         if (isEditMode) {
           const rsvpRes = await rsvpService.getById(id);
           const rsvp = rsvpRes.data;
@@ -93,11 +73,8 @@ function RsvpForm() {
     };
 
     fetchData();
-  }, [id, isEditMode, reset]);
+  }, [id, isEditMode, reset, isAdmin, user, setValue]);
 
-  /**
-   * Handle form submission: create a new RSVP or update an existing one.
-   */
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
@@ -108,7 +85,6 @@ function RsvpForm() {
         await rsvpService.create(data);
         toast.success('RSVP created successfully.');
       }
-      // Redirect back to the RSVPs list
       navigate('/rsvps');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to save RSVP. Please try again.';
@@ -118,23 +94,18 @@ function RsvpForm() {
     }
   };
 
-  // Display loading spinner while fetching initial data
   if (loading) return <LoadingSpinner />;
-
-  // Display error message if data fetch failed
   if (error) return <ErrorMessage message={error} />;
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Page heading changes based on create vs edit mode */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">
         {isEditMode ? 'Edit RSVP' : 'Create New RSVP'}
       </h2>
 
-      {/* RSVP form card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Event dropdown - populated from eventService.getAll() */}
+          {/* Event dropdown */}
           <div>
             <label htmlFor="eventId" className="block text-sm font-medium text-gray-700 mb-1">
               Event *
@@ -158,29 +129,42 @@ function RsvpForm() {
             )}
           </div>
 
-          {/* Attendee dropdown - populated from attendeeService.getAll() */}
-          <div>
-            <label htmlFor="attendeeId" className="block text-sm font-medium text-gray-700 mb-1">
-              Attendee *
-            </label>
-            <select
-              id="attendeeId"
-              {...register('attendeeId')}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.attendeeId ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Select an attendee</option>
-              {attendees.map((attendee) => (
-                <option key={attendee.id} value={attendee.id}>
-                  {attendee.firstName} {attendee.lastName}
-                </option>
-              ))}
-            </select>
-            {errors.attendeeId && (
-              <p className="form-error text-red-500 text-sm mt-1">{errors.attendeeId.message}</p>
-            )}
-          </div>
+          {/* Attendee dropdown - admin sees all, user sees only themselves */}
+          {isAdmin ? (
+            <div>
+              <label htmlFor="attendeeId" className="block text-sm font-medium text-gray-700 mb-1">
+                Attendee *
+              </label>
+              <select
+                id="attendeeId"
+                {...register('attendeeId')}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
+                  errors.attendeeId ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select an attendee</option>
+                {attendees.map((attendee) => (
+                  <option key={attendee.id} value={attendee.id}>
+                    {attendee.firstName} {attendee.lastName}
+                  </option>
+                ))}
+              </select>
+              {errors.attendeeId && (
+                <p className="form-error text-red-500 text-sm mt-1">{errors.attendeeId.message}</p>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Attendee</label>
+              <input
+                type="text"
+                value={user?.username || ''}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+              />
+              <input type="hidden" {...register('attendeeId')} />
+            </div>
+          )}
 
           {/* RSVP Status dropdown */}
           <div>
@@ -205,7 +189,7 @@ function RsvpForm() {
             )}
           </div>
 
-          {/* Dietary preferences (optional text field) */}
+          {/* Dietary preferences */}
           <div>
             <label htmlFor="dietaryPreferences" className="block text-sm font-medium text-gray-700 mb-1">
               Dietary Preferences
@@ -224,7 +208,7 @@ function RsvpForm() {
             )}
           </div>
 
-          {/* Special requirements (optional text field) */}
+          {/* Special requirements */}
           <div>
             <label htmlFor="specialRequirements" className="block text-sm font-medium text-gray-700 mb-1">
               Special Requirements

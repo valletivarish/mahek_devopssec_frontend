@@ -32,6 +32,7 @@ export function AuthProvider({ children }) {
       username: authData.username,
       email: authData.email,
       role: authData.role,
+      attendeeId: authData.attendeeId,
     });
     localStorage.setItem('token', authData.token);
     localStorage.setItem('user', JSON.stringify({
@@ -39,6 +40,7 @@ export function AuthProvider({ children }) {
       username: authData.username,
       email: authData.email,
       role: authData.role,
+      attendeeId: authData.attendeeId,
     }));
   };
 

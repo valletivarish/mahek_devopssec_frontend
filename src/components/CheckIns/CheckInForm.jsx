@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 import { checkinSchema } from '../../utils/validators';
 import checkinService from '../../services/checkinService';
 import eventService from '../../services/eventService';
@@ -12,50 +13,29 @@ import ErrorMessage from '../common/ErrorMessage';
 
 /**
  * CheckInForm component for recording new attendee check-ins.
- * Features:
- * - Form validation using react-hook-form with yup checkinSchema
- * - Fields: eventId (dropdown), attendeeId (dropdown), checkInMethod (dropdown), notes (text)
- * - Event and Attendee dropdowns are dynamically populated from their respective services
- * - Check-in method options: QR_CODE and MANUAL
- * - On submit: calls checkinService.create to record the check-in
- * - Success toast notification and redirect back to /checkins
- * - Inline validation errors displayed below each field
- *
- * Note: Check-ins are create-only operations (no edit mode) since they represent
- * a point-in-time attendance record.
+ * Admin users can select any attendee from the dropdown.
+ * Regular users are auto-assigned to their linked attendee record.
  */
 function CheckInForm() {
-  // Navigation hook for redirecting after form submission
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
-  // State for event options loaded from the API
   const [events, setEvents] = useState([]);
-
-  // State for attendee options loaded from the API
   const [attendees, setAttendees] = useState([]);
-
-  // Loading state for initial data fetch
   const [loading, setLoading] = useState(true);
-
-  // Error state for displaying fetch errors
   const [error, setError] = useState('');
-
-  // Track form submission state to prevent double-clicks
   const [submitting, setSubmitting] = useState(false);
 
-  // Initialize react-hook-form with yup check-in validation schema
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(checkinSchema),
   });
 
-  /**
-   * On component mount, fetch events and attendees for the dropdown selectors.
-   * Both are fetched in parallel using Promise.all for better performance.
-   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,6 +45,11 @@ function CheckInForm() {
         ]);
         setEvents(eventsRes.data);
         setAttendees(attendeesRes.data);
+
+        // For non-admin users, auto-set their linked attendee
+        if (!isAdmin && user?.attendeeId) {
+          setValue('attendeeId', user.attendeeId);
+        }
       } catch (err) {
         setError('Failed to load form data. Please try again.');
       } finally {
@@ -73,18 +58,13 @@ function CheckInForm() {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin, user, setValue]);
 
-  /**
-   * Handle form submission: create a new check-in record.
-   * The backend will automatically set the check-in timestamp.
-   */
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
       await checkinService.create(data);
       toast.success('Check-in recorded successfully.');
-      // Redirect back to the check-ins list
       navigate('/checkins');
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Failed to record check-in. Please try again.';
@@ -94,21 +74,16 @@ function CheckInForm() {
     }
   };
 
-  // Display loading spinner while fetching dropdown data
   if (loading) return <LoadingSpinner />;
-
-  // Display error message if data fetch failed
   if (error) return <ErrorMessage message={error} />;
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Page heading */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">New Check-In</h2>
 
-      {/* Check-in form card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Event dropdown - populated from eventService.getAll() */}
+          {/* Event dropdown */}
           <div>
             <label htmlFor="eventId" className="block text-sm font-medium text-gray-700 mb-1">
               Event *
@@ -132,29 +107,42 @@ function CheckInForm() {
             )}
           </div>
 
-          {/* Attendee dropdown - populated from attendeeService.getAll() */}
-          <div>
-            <label htmlFor="attendeeId" className="block text-sm font-medium text-gray-700 mb-1">
-              Attendee *
-            </label>
-            <select
-              id="attendeeId"
-              {...register('attendeeId')}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.attendeeId ? 'border-red-500' : 'border-gray-300'
-              }`}
-            >
-              <option value="">Select an attendee</option>
-              {attendees.map((attendee) => (
-                <option key={attendee.id} value={attendee.id}>
-                  {attendee.firstName} {attendee.lastName}
-                </option>
-              ))}
-            </select>
-            {errors.attendeeId && (
-              <p className="form-error text-red-500 text-sm mt-1">{errors.attendeeId.message}</p>
-            )}
-          </div>
+          {/* Attendee - admin sees dropdown, user sees their name */}
+          {isAdmin ? (
+            <div>
+              <label htmlFor="attendeeId" className="block text-sm font-medium text-gray-700 mb-1">
+                Attendee *
+              </label>
+              <select
+                id="attendeeId"
+                {...register('attendeeId')}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
+                  errors.attendeeId ? 'border-red-500' : 'border-gray-300'
+                }`}
+              >
+                <option value="">Select an attendee</option>
+                {attendees.map((attendee) => (
+                  <option key={attendee.id} value={attendee.id}>
+                    {attendee.firstName} {attendee.lastName}
+                  </option>
+                ))}
+              </select>
+              {errors.attendeeId && (
+                <p className="form-error text-red-500 text-sm mt-1">{errors.attendeeId.message}</p>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Attendee</label>
+              <input
+                type="text"
+                value={user?.username || ''}
+                disabled
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+              />
+              <input type="hidden" {...register('attendeeId')} />
+            </div>
+          )}
 
           {/* Check-in method dropdown */}
           <div>
@@ -177,7 +165,7 @@ function CheckInForm() {
             )}
           </div>
 
-          {/* Notes (optional text area) */}
+          {/* Notes */}
           <div>
             <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
               Notes
