@@ -19,7 +19,7 @@ jobs:
   # Runs on every push and pull request
   # ============================================
   ci:
-    name: Lint, Audit & Build
+    name: CI - Lint, Audit & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -98,7 +98,7 @@ jobs:
   # Only runs on push to main branch (not on PRs)
   # ============================================
   cd:
-    name: Deploy to AWS S3
+    name: CD - Deploy to AWS S3
     needs: ci
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
