@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
+import { useAuth } from '../../context/AuthContext';
 import checkinService from '../../services/checkinService';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorMessage from '../common/ErrorMessage';
@@ -20,6 +21,9 @@ import ConfirmDialog from '../common/ConfirmDialog';
  * Note: Check-ins are typically create-only (no edit), so only delete actions are shown.
  */
 function CheckInList() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
   // State for the list of check-ins fetched from the API
   const [checkins, setCheckins] = useState([]);
 
@@ -128,7 +132,7 @@ function CheckInList() {
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Check-In Time</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Method</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Notes</th>
-                <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                {isAdmin && <th className="px-6 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -162,22 +166,24 @@ function CheckInList() {
                     <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                       {checkin.notes || '-'}
                     </td>
-                    {/* Delete action button */}
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleDeleteClick(checkin.id)}
-                        className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50 transition"
-                        title="Delete check-in"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
+                    {/* Delete action button - ADMIN only */}
+                    {isAdmin && (
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => handleDeleteClick(checkin.id)}
+                          className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50 transition"
+                          title="Delete check-in"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (
                 // Empty state when no check-ins exist
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                  <td colSpan={isAdmin ? 6 : 5} className="px-6 py-12 text-center text-gray-400">
                     No check-ins recorded yet. Record your first check-in to get started.
                   </td>
                 </tr>

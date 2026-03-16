@@ -25,7 +25,7 @@ function Sidebar() {
     { path: '/attendees', label: 'Attendees', icon: FiUsers, roles: ['ADMIN'] },
     { path: '/categories', label: 'Categories', icon: FiTag, roles: ['ADMIN'] },
     { path: '/rsvps', label: 'RSVPs', icon: FiCheckCircle, roles: ['ADMIN', 'USER'] },
-    { path: '/checkins', label: 'Check-ins', icon: FiUserCheck, roles: ['ADMIN'] },
+    { path: '/checkins', label: 'Check-ins', icon: FiUserCheck, roles: ['ADMIN', 'USER'] },
     { path: '/reports', label: 'Reports', icon: FiBarChart2, roles: ['ADMIN'] },
   ];
 
