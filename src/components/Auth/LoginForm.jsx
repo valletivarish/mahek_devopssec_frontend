@@ -138,27 +138,41 @@ function LoginForm() {
         {/* Demo credential buttons for quick login */}
         <div className="mt-6">
           <p className="text-center text-sm text-gray-400 mb-3">Quick login with demo accounts</p>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => fillDemoCredentials('admin', 'admin123')}
-              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-primary-300 text-primary-700 bg-primary-50 hover:bg-primary-100 transition"
+              className="py-2 px-3 text-sm font-medium rounded-lg border border-primary-300 text-primary-700 bg-primary-50 hover:bg-primary-100 transition"
             >
-              Demo: Admin
+              Admin
             </button>
             <button
               type="button"
               onClick={() => fillDemoCredentials('john', 'john123')}
-              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+              className="py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
             >
-              Demo: John
+              John
             </button>
             <button
               type="button"
               onClick={() => fillDemoCredentials('sarah', 'sarah123')}
-              className="flex-1 py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+              className="py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
             >
-              Demo: Sarah
+              Sarah
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoCredentials('demo', 'demo123')}
+              className="py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => fillDemoCredentials('mike', 'mike123')}
+              className="py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 transition"
+            >
+              Mike
             </button>
           </div>
         </div>
