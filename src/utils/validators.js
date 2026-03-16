@@ -9,8 +9,8 @@ export const eventSchema = yup.object().shape({
   startTime: yup.string().required('Start time is required'),
   endTime: yup.string().required('End time is required'),
   location: yup.string().required('Location is required').max(500, 'Location must not exceed 500 characters'),
-  capacity: yup.number().required('Capacity is required').min(1, 'Capacity must be at least 1').max(10000, 'Capacity must not exceed 10000').integer('Capacity must be a whole number'),
-  categoryId: yup.number().required('Category is required'),
+  capacity: yup.number().typeError('Capacity is required').required('Capacity is required').min(1, 'Capacity must be at least 1').max(10000, 'Capacity must not exceed 10000').integer('Capacity must be a whole number'),
+  categoryId: yup.number().typeError('Category is required').required('Category is required'),
 });
 
 // Validation schema for attendee creation/editing forms
@@ -31,8 +31,8 @@ export const categorySchema = yup.object().shape({
 
 // Validation schema for RSVP creation/editing forms
 export const rsvpSchema = yup.object().shape({
-  eventId: yup.number().required('Event is required'),
-  attendeeId: yup.number().required('Attendee is required'),
+  eventId: yup.number().typeError('Event is required').required('Event is required'),
+  attendeeId: yup.number().typeError('Attendee is required').required('Attendee is required'),
   status: yup.string().required('RSVP status is required').oneOf(['CONFIRMED', 'DECLINED', 'MAYBE', 'WAITLISTED'], 'Invalid RSVP status'),
   dietaryPreferences: yup.string().max(500, 'Dietary preferences must not exceed 500 characters'),
   specialRequirements: yup.string().max(500, 'Special requirements must not exceed 500 characters'),
@@ -40,8 +40,8 @@ export const rsvpSchema = yup.object().shape({
 
 // Validation schema for check-in creation forms
 export const checkinSchema = yup.object().shape({
-  eventId: yup.number().required('Event is required'),
-  attendeeId: yup.number().required('Attendee is required'),
+  eventId: yup.number().typeError('Event is required').required('Event is required'),
+  attendeeId: yup.number().typeError('Attendee is required').required('Attendee is required'),
   checkInMethod: yup.string().required('Check-in method is required').oneOf(['QR_CODE', 'MANUAL'], 'Invalid check-in method'),
   notes: yup.string().max(500, 'Notes must not exceed 500 characters'),
 });
