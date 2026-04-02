@@ -127,10 +127,9 @@ function AttendeeForm() {
                 id="firstName"
                 type="text"
                 {...register('firstName')}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                  errors.firstName ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter first name"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                placeholder="(First name)"
               />
               {errors.firstName && (
                 <p className="form-error text-red-500 text-sm mt-1">{errors.firstName.message}</p>
@@ -146,9 +145,8 @@ function AttendeeForm() {
                 id="lastName"
                 type="text"
                 {...register('lastName')}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                  errors.lastName ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 placeholder="Enter last name"
               />
               {errors.lastName && (
@@ -166,9 +164,8 @@ function AttendeeForm() {
               id="email"
               type="email"
               {...register('email')}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Enter email address"
             />
             {errors.email && (
@@ -185,9 +182,8 @@ function AttendeeForm() {
               id="phone"
               type="text"
               {...register('phone')}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.phone ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Enter phone number"
             />
             {errors.phone && (
@@ -204,9 +200,8 @@ function AttendeeForm() {
               id="organization"
               type="text"
               {...register('organization')}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${
-                errors.organization ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition ${errors.organization ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Enter organisation name"
             />
             {errors.organization && (
@@ -231,8 +226,8 @@ function AttendeeForm() {
               {submitting
                 ? 'Saving...'
                 : isEditMode
-                ? 'Update Attendee'
-                : 'Add Attendee'}
+                  ? 'Update Attendee'
+                  : 'Add Attendee'}
             </button>
           </div>
         </form>
