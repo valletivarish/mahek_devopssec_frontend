@@ -123,7 +123,11 @@ jobs:
       - name: Deploy to S3
         run: aws s3 sync dist/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
 
-      # Step 4: Smoke test - verify the backend health endpoint is reachable
+      # Step 4: Set no-cache on index.html so browsers always fetch the latest version
+      - name: Set Cache Headers
+        run: aws s3 cp s3://${{ secrets.S3_BUCKET_NAME }}/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html --cache-control "no-cache, no-store, must-revalidate" --content-type "text/html" --metadata-directive REPLACE
+
+      # Step 5: Smoke test - verify the backend health endpoint is reachable
       - name: Smoke Test - Backend Health Check
         run: |
           curl -f http://${{ secrets.EC2_HOST }}/api/health || echo "Backend health check pending"
