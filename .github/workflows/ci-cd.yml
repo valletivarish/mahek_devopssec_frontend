@@ -54,7 +54,7 @@ jobs:
       - name: Build Production Bundle
         run: npm run build
         env:
-          VITE_API_URL: http://${{ secrets.EC2_HOST }}:8080/api
+          VITE_API_URL: http://${{ secrets.EC2_HOST }}/api
 
       # Step 8: Run Trivy filesystem scan for additional security analysis
       - name: Security Vulnerability Scan (Trivy)
@@ -126,4 +126,4 @@ jobs:
       # Step 4: Smoke test - verify the backend health endpoint is reachable
       - name: Smoke Test - Backend Health Check
         run: |
-          curl -f http://${{ secrets.EC2_HOST }}:8080/api/health || echo "Backend health check pending"
+          curl -f http://${{ secrets.EC2_HOST }}/api/health || echo "Backend health check pending"
